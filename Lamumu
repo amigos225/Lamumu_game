@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lamumu & Common Game 🐮</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #222;
+      color: white;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+      margin: auto;
+      background: url('https://i.imgur.com/vk6US5t.png') repeat; /* cow battlefield style */
+      background-size: cover;
+    }
+    #score {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 24px;
+      font-weight: bold;
+      color: yellow;
+    }
+  </style>
+</head>
+<body>
+  <div id="score">Score: 0</div>
+  <canvas id="gameCanvas" width="800" height="500"></canvas>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let cow = { x: 50, y: 220, w: 50, h: 50, color: "white" };
+    let bullets = [];
+    let enemies = [];
+    let score = 0;
+
+    // controls
+    document.addEventListener("keydown", e => {
+      if (e.code === "Space") {
+        bullets.push({ x: cow.x + 50, y: cow.y + 20, w: 10, h: 5 });
+      }
+      if (e.code === "ArrowUp") cow.y -= 20;
+      if (e.code === "ArrowDown") cow.y += 20;
+    });
+
+    function drawCow() {
+      ctx.fillStyle = "white";
+      ctx.fillRect(cow.x, cow.y, cow.w, cow.h);
+      ctx.fillStyle = "black";
+      ctx.fillText("🐮", cow.x + 10, cow.y + 35);
+    }
+
+    function drawBullets() {
+      ctx.fillStyle = "red";
+      bullets.forEach(b => {
+        ctx.fillRect(b.x, b.y, b.w, b.h);
+        b.x += 5;
+      });
+    }
+
+    function drawEnemies() {
+      ctx.fillStyle = "green";
+      enemies.forEach(e => {
+        ctx.fillRect(e.x, e.y, e.w, e.h);
+        e.x -= 3;
+      });
+    }
+
+    function detectCollision() {
+      bullets.forEach((b, bi) => {
+        enemies.forEach((e, ei) => {
+          if (b.x < e.x + e.w && b.x + b.w > e.x &&
+              b.y < e.y + e.h && b.y + b.h > e.y) {
+            enemies.splice(ei, 1);
+            bullets.splice(bi, 1);
+            score += 10;
+            document.getElementById("score").innerText = "Score: " + score;
+          }
+        });
+      });
+    }
+
+    function spawnEnemies() {
+      if (Math.random() < 0.02) {
+        enemies.push({ x: 800, y: Math.random() * 450, w: 40, h: 40 });
+      }
+    }
+
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawCow();
+      drawBullets();
+      drawEnemies();
+      detectCollision();
+      spawnEnemies();
+      requestAnimationFrame(gameLoop);
+    }
+
+    gameLoop();
+  </script>
+</body>
+</html>
